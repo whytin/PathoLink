@@ -3,7 +3,7 @@
 **PathoLink** is a multimodal learning framework designed to bridge **histopathological images** and **spatial/single-cell omics data**.  
 It leverages **Transformer architectures** and a **Mixture-of-Experts (MoE)** mechanism to enable scalable, interpretable **cross-modal prediction** and **morphology–molecular alignment**.
 
-> 🧬 This repository is the official implementation accompanying our paper *“PathoLink: Bridging Histopathology and Omics via Mixture-of-Experts Transformer”*, which is **currently under review**.  
+> 🧬 This repository is the official implementation accompanying our paper *“PathoLink: Bridging Pathology and Transcriptomics at Single-Cell Resolution by Synergistic Information Gain Theory”*, which is **currently under review**.  
 > The code is under **active development**, and we will continue updating this repository with new modules and pretrained checkpoints — **stay tuned!**
 
 ---
@@ -13,9 +13,7 @@ It leverages **Transformer architectures** and a **Mixture-of-Experts (MoE)** me
 In conventional models, predicting molecular expression (`Y`) from histology (`X`) is constrained by modality-specific redundancy.  
 **PathoLink** introduces a synergistic information framework that learns a shared latent representation `Z` bridging both domains — reducing conditional uncertainty and enhancing predictive power:
 
-\[
 H(Y|X,Z) < H(Y|X)
-\]
 
 This design enables interpretable feature learning and robust cross-modal generation between tissue morphology and omics signals.
 
