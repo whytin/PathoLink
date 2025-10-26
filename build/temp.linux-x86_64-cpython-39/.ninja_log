@@ -1,0 +1,16 @@
+# ninja log v5
+1	18	1747545071492006848	/home/whytin/Research/Project/fastmoe/build/temp.linux-x86_64-cpython-39/cuda/fastermoe/smart_schedule.o	3c05d3fd468f3ad3
+2	1022	1747545072496019137	/home/whytin/Research/Project/fastmoe/build/temp.linux-x86_64-cpython-39/cuda/stream_manager.o	79dd4ea1341e1f4e
+1	6967	1747545078434091715	/home/whytin/Research/Project/fastmoe/build/temp.linux-x86_64-cpython-39/cuda/global_exchange.o	a8eb4f79c7cc1631
+1	8524	1747545079993110742	/home/whytin/Research/Project/fastmoe/build/temp.linux-x86_64-cpython-39/cuda/fmoe_cuda.o	f62c5b4a89f48d1a
+5	11	1747545912569206657	/home/whytin/Research/Project/fastmoe/build/temp.linux-x86_64-cpython-39/cuda/fastermoe/smart_schedule.o	df59295af345464e
+6	1203	1747545913761218787	/home/whytin/Research/Project/fastmoe/build/temp.linux-x86_64-cpython-39/cuda/stream_manager.o	e3afb80a0a6748f0
+5	11928	1747545924480327799	/home/whytin/Research/Project/fastmoe/build/temp.linux-x86_64-cpython-39/cuda/global_exchange.o	c54bbdd2c7fa5e6c
+5	12441	1747545924990332983	/home/whytin/Research/Project/fastmoe/build/temp.linux-x86_64-cpython-39/cuda/fmoe_cuda.o	2b2f3ec06465b9f1
+10	17	1747548173260629175	/home/whytin/Research/Project/fastmoe/build/temp.linux-x86_64-cpython-39/cuda/fastermoe/smart_schedule.o	88ab9dfb6272a5d1
+11	1298	1747548174541641372	/home/whytin/Research/Project/fastmoe/build/temp.linux-x86_64-cpython-39/cuda/stream_manager.o	e3715ad4512efbfb
+10	12690	1747548185922749740	/home/whytin/Research/Project/fastmoe/build/temp.linux-x86_64-cpython-39/cuda/global_exchange.o	dc0582f6fba46dd
+10	12988	1747548186223752606	/home/whytin/Research/Project/fastmoe/build/temp.linux-x86_64-cpython-39/cuda/fmoe_cuda.o	103d2be2867684db
+11	33485	1747548206718947769	/home/whytin/Research/Project/fastmoe/build/temp.linux-x86_64-cpython-39/cuda/local_exchange.o	b3f9f3d9b7967b60
+10	34168	1747548207402954283	/home/whytin/Research/Project/fastmoe/build/temp.linux-x86_64-cpython-39/cuda/balancing.o	23011dc3fe06ad50
+11	34940	1747548208176961653	/home/whytin/Research/Project/fastmoe/build/temp.linux-x86_64-cpython-39/cuda/parallel_linear.o	87b67497449ac7e2
