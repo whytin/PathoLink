@@ -1,10 +1,6 @@
-"""
-scGPT inference script for PathoLink.
+"""scGPT inference for PathoLink.
 
-Input: HEST h5ad (cell x gene expression).
-Output:
-  - gene_emb.npy: [N, G, D_gene] per-cell per-gene embeddings.
-  - cell_type.npy: [N] cell type labels (0-based int).
+Extract gene embeddings and cell type labels.
 """
 import argparse
 import json
@@ -62,7 +58,6 @@ def main():
     pad_token = "<pad>"
     special_tokens = [pad_token, "<cls>", "<eoc>"]
 
-    print(f"Loading vocab from {vocab_file}")
     vocab = GeneVocab.from_file(vocab_file)
     for s in special_tokens:
         if s not in vocab:
@@ -80,7 +75,7 @@ def main():
     gene_ids = np.array(vocab(genes), dtype=int)
 
     # Build model
-    print("Building scGPT model...")
+    print("Building model...")
     model = TransformerModel(
         ntoken=len(vocab),
         d_model=model_configs["embsize"],
@@ -158,7 +153,7 @@ def main():
 
     with torch.no_grad(), torch.cuda.amp.autocast(enabled=True):
         count = 0
-        for data_dict in tqdm(data_loader, desc="Embedding cells"):
+        for data_dict in tqdm(data_loader, desc="Embedding"):
             input_gene_ids = data_dict["gene"].to(device)
             src_key_padding_mask = input_gene_ids.eq(vocab[model_configs["pad_token"]])
             embeddings = model._encode(
@@ -176,12 +171,11 @@ def main():
 
     # Trim to actual gene count G
     G = len(gene_ids)
-    gene_embeddings = gene_embeddings[:, 1 : G + 1, :]  # skip cls token at position 0, take next G tokens
+    gene_embeddings = gene_embeddings[:, 1 : G + 1, :]  # skip cls token
 
-    # Generate dummy cell type labels (placeholder: all zeros)
-    # In practice, you need to run a classifier or cell type annotation model
+    # TODO: Replace with actual cell type prediction
     cell_type = np.zeros(N, dtype=np.int64)
-    print(f"Warning: cell_type labels are all zeros (placeholder). Please replace with real cell type inference.")
+    print(f"Warning: cell_type all zeros, need real classifier")
 
     # Save
     os.makedirs(os.path.dirname(args.output_gene_emb) or ".", exist_ok=True)

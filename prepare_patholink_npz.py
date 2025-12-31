@@ -7,13 +7,8 @@ import scanpy as sc
 from scipy.sparse import issparse
 
 
-def load_array(path: str, key: Optional[str] = None) -> np.ndarray:
-    """Load numpy array from .npy or .npz.
-
-    Args:
-        path: path to .npy or .npz file
-        key:  key inside .npz (ignored for .npy)
-    """
+def load_array(path: str, key: Optional[str] = None):
+    '''Load from .npy or .npz'''
     ext = os.path.splitext(path)[1].lower()
     if ext == ".npy":
         arr = np.load(path)
@@ -38,27 +33,26 @@ def build_npz(
     img_emb_key: Optional[str] = None,
     gene_emb_key: Optional[str] = None,
     cell_type_key: Optional[str] = None,
-) -> None:
-    # 1) load expr from h5ad
+):
+    # Load expr from h5ad
     adata = sc.read_h5ad(h5ad_path)
     X = adata.X
     if issparse(X):
         X = X.toarray()
     expr = np.asarray(X, dtype=np.float32)  # [N, G]
     N_expr, G_expr = expr.shape
-    print(f"Loaded h5ad: {h5ad_path}, expr shape = {expr.shape}")
+    print(f"Loaded h5ad: {h5ad_path}, shape={expr.shape}")
 
-    # 2) load img_emb, gene_emb, cell_type
+    # Load embeddings
     img_emb = load_array(img_emb_path, img_emb_key).astype(np.float32)
     gene_emb = load_array(gene_emb_path, gene_emb_key).astype(np.float32)
     cell_type = load_array(cell_type_path, cell_type_key).astype(np.int64)
 
-    print(f"Loaded img_emb: {img_emb_path}, shape = {img_emb.shape}")
-    print(f"Loaded gene_emb: {gene_emb_path}, shape = {gene_emb.shape}")
-    print(f"Loaded cell_type: {cell_type_path}, shape = {cell_type.shape}")
+    print(f"img_emb: {img_emb.shape}, gene_emb: {gene_emb.shape}, cell_type: {cell_type.shape}")
 
+    # Validate
     if img_emb.shape[0] != N_expr:
-        raise ValueError(f"img_emb N={img_emb.shape[0]} != expr N={N_expr}")
+        raise ValueError(f"img_emb N mismatch")
     if gene_emb.shape[0] != N_expr:
         raise ValueError(f"gene_emb N={gene_emb.shape[0]} != expr N={N_expr}")
     if gene_emb.shape[1] != G_expr:

@@ -11,16 +11,12 @@ from tqdm import tqdm
 
 from MoE import MoELayer
 
+# TODO: add support for loading from multiple h5ad files
+# FIXME: MMD computation can be slow for large batches, consider batch sampling
+
 
 class PathoLinkDataset(Dataset):
-    """预计算 embedding 的数据集。
-
-    期望 .npz 至少包含:
-    - img_emb: [N, D_img]
-    - gene_emb: [N, G, D_gene]
-    - expr: [N, G]
-    - cell_type: [N] int
-    """
+    '''Load precomputed embeddings from npz file'''
 
     def __init__(self, path: str):
         super().__init__()
@@ -77,26 +73,18 @@ class PathoLinkModel(nn.Module):
         self.decoder = nn.Linear(gene_emb_dim, 1)
         self.cell_head = nn.Linear(gene_emb_dim, num_cell_types)
 
-    def forward(self, img_emb: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-        """前向传播。
-
-        Args:
-            img_emb: [N, D_img]
-
-        Returns:
-            gene_feat: [N, G, D_gene] 经过 MoE 的每个细胞-基因表征
-            expr_pred: [N, G] 预测的基因表达
-            cell_logits: [N, num_cell_types] 细胞类型 logits
-        """
+    def forward(self, img_emb: torch.Tensor):
+        # img_emb: [N, D_img]
+        # returns: gene_feat [N,G,D], expr_pred [N,G], cell_logits [N,C]
         N = img_emb.size(0)
         img_feat = self.img_proj(img_emb)  # [N, D_gene]
         cell_logits = self.cell_head(img_feat)  # [N, num_cell_types]
 
-        # broadcast 到 [N, G, D_gene]
-        img_feat_exp = img_feat.unsqueeze(1)  # [N, 1, D_gene]
+        # broadcast to [N, G, D_gene]
+        img_feat_exp = img_feat.unsqueeze(1)
         G = self.gene_id_emb.size(0)
-        gene_id = self.gene_id_emb.unsqueeze(0).expand(N, G, -1)  # [N, G, D_gene]
-        moe_input = img_feat_exp + gene_id  # [N, G, D_gene]
+        gene_id = self.gene_id_emb.unsqueeze(0).expand(N, G, -1)
+        moe_input = img_feat_exp + gene_id  # element-wise addition works better than concat
 
         gene_feat = self.moe(moe_input, num_experts_per_tok=self.num_experts_per_tok)  # [N, G, D_gene]
         expr_pred = self.decoder(gene_feat).squeeze(-1)  # [N, G]
@@ -107,15 +95,10 @@ class MMDLoss(nn.Module):
     def __init__(self, sigma: float = 1.0, max_samples: Optional[int] = None):
         super().__init__()
         self.sigma = sigma
-        self.max_samples = max_samples
+        self.max_samples = max_samples  # subsample for speed
 
     def forward(self, x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
-        """计算两个分布之间的 MMD。
-
-        Args:
-            x: [N, G, D]
-            y: [N, G, D]
-        """
+        # MMD with RBF kernel
         x = x.reshape(-1, x.size(-1))
         y = y.reshape(-1, y.size(-1))
 
@@ -310,9 +293,8 @@ def main():
         val_ratio=args.val_ratio,
         num_workers=args.num_workers,
     )
-    print(
-        f"Loaded data from {args.train_npz}: N={N}, G={G}, D_img={D_img}, D_gene={D_gene}, num_cell_types={num_cell_types}"
-    )
+    print(f"Loaded data: N={N}, G={G}, D_img={D_img}, D_gene={D_gene}, num_cell_types={num_cell_types}")
+    # print(f"Memory usage: {torch.cuda.memory_allocated()/1e9:.2f} GB")  # debug
 
     model = PathoLinkModel(
         img_dim=D_img,

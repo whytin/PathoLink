@@ -1,8 +1,6 @@
-"""
-Virchow2 inference script for PathoLink.
+"""Virchow2 inference for PathoLink.
 
-Input: HEST h5ad with .obsm['img'] containing cell-level patches [N, H, W, 3].
-Output: .npy file with Virchow2 embeddings [N, 2560].
+Extract cell-level image embeddings from HEST h5ad.
 """
 import argparse
 import os
@@ -34,7 +32,7 @@ def main():
     print(f"Using device: {device}")
 
     # Load Virchow2
-    print("Loading Virchow2 model...")
+    print("Loading Virchow2...")
     model = timm.create_model(
         "hf-hub:paige-ai/Virchow2",
         pretrained=True,
@@ -48,21 +46,20 @@ def main():
     print(f"Loading h5ad: {args.h5ad}")
     adata = sc.read_h5ad(args.h5ad)
     if "img" not in adata.obsm:
-        raise KeyError("No 'img' key in adata.obsm. Please ensure cell patches are stored there.")
-    images = adata.obsm["img"]  # [N, H, W, 3]
+        raise KeyError("No 'img' in adata.obsm")
+    images = adata.obsm["img"]
     N = images.shape[0]
-    print(f"Loaded {N} cell patches from h5ad")
+    print(f"{N} cells loaded")
 
     # Optional: Reinhard normalization
     mean_ref, std_ref = None, None
     if args.ref_he is not None:
         import histomicstk as htk
         import skimage.io
-        import skimage.color
 
-        print(f"Loading reference H&E from {args.ref_he}")
         im_reference = skimage.io.imread(args.ref_he)[:, :, :3]
         mean_ref, std_ref = htk.preprocessing.color_conversion.lab_mean_std(im_reference)
+        print("Using Reinhard normalization")
 
     # Batch inference
     batch_imgs = []
@@ -75,8 +72,8 @@ def main():
         with torch.inference_mode(), torch.autocast(device_type=args.device, dtype=torch.float16):
             output = model(batch)
         class_token = output[:, 0]
-        patch_tokens = output[:, 5:]
-        embedding = torch.cat([class_token, patch_tokens.mean(1)], dim=-1)  # [B, 2560]
+        patch_tokens = output[:, 5:]  # skip register tokens
+        embedding = torch.cat([class_token, patch_tokens.mean(1)], dim=-1)
         embedding = embedding.to(torch.float16).cpu().numpy()
         embeddings_list.append(embedding)
         batch_imgs.clear()

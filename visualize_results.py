@@ -1,12 +1,6 @@
-"""
-PathoLink 结果可视化脚本
+"""PathoLink results visualization.
 
-功能：
-- 空间转录数据可视化
-- UMAP 降维可视化
-- 聚类结果可视化
-- SSIM 计算与可视化
-- PCC (Pearson 相关系数) 计算与可视化
+Spatial plots, UMAP, clustering, SSIM, PCC, etc.
 """
 import argparse
 import os
@@ -31,8 +25,8 @@ def visualize_spatial(
     spot_size: float = 1.0,
     save_prefix: str = "spatial",
 ):
-    """可视化空间转录数据"""
-    print(f"Visualizing {len(genes)} genes spatially...")
+    '''Plot spatial gene expression'''
+    print(f"Plotting {len(genes)} genes...")
     os.makedirs(output_dir, exist_ok=True)
     
     for gene in tqdm(genes, desc="Spatial plots"):
@@ -133,21 +127,12 @@ def compute_ssim(
     expr_pred: np.ndarray,
     output_path: Optional[str] = None,
 ) -> Dict[str, float]:
-    """计算 SSIM (Structural Similarity Index)
-    
-    Args:
-        expr_true: [N, G] ground truth
-        expr_pred: [N, G] predictions
-        output_path: 保存 SSIM 分布图
-    
-    Returns:
-        dict with 'ssim_mean', 'ssim_std', 'ssim_per_gene'
-    """
+    '''Calculate SSIM between true and predicted expression'''
     print("Computing SSIM...")
     N, G = expr_true.shape
     assert expr_pred.shape == (N, G), f"Shape mismatch: {expr_pred.shape} != {expr_true.shape}"
     
-    # Normalize to [0, 1] for SSIM
+    # Normalize for SSIM
     expr_true_norm = (expr_true - expr_true.min()) / (expr_true.max() - expr_true.min() + 1e-12)
     expr_pred_norm = (expr_pred - expr_pred.min()) / (expr_pred.max() - expr_pred.min() + 1e-12)
     
@@ -194,17 +179,7 @@ def compute_pcc(
     output_path: Optional[str] = None,
     gene_names: Optional[list] = None,
 ) -> Dict[str, float]:
-    """计算 Pearson 相关系数 (PCC)
-    
-    Args:
-        expr_true: [N, G] ground truth
-        expr_pred: [N, G] predictions
-        output_path: 保存 PCC 分布图
-        gene_names: 基因名列表
-    
-    Returns:
-        dict with 'pcc_mean', 'pcc_std', 'pcc_per_gene'
-    """
+    '''Pearson correlation per gene'''
     print("Computing PCC...")
     N, G = expr_true.shape
     assert expr_pred.shape == (N, G), f"Shape mismatch: {expr_pred.shape} != {expr_true.shape}"
