@@ -1,3 +1,11 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+PathoLink Multi-task Training Script
+
+Author: Weitian Huang
+Email: cswthuang@scut.edu.cn
+"""
 import argparse
 import os
 from pathlib import Path

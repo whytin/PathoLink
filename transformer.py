@@ -1,3 +1,11 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Transformer Architecture
+
+Author: Weitian Huang
+Email: cswthuang@scut.edu.cn
+"""
 import torch
 from torch import nn, einsum
 import torch.nn.functional as F

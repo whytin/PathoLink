@@ -1,5 +1,13 @@
 
 
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Mixture of Experts Layer
+
+Author: Weitian Huang
+Email: cswthuang@scut.edu.cn
+"""
 import torch
 import torch.nn as nn
 import torch.nn.functional as F

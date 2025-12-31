@@ -1,6 +1,11 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """scGPT inference for PathoLink.
 
 Extract gene embeddings and cell type labels.
+
+Author: Weitian Huang
+Email: cswthuang@scut.edu.cn
 """
 import argparse
 import json

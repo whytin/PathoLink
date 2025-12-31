@@ -1,6 +1,11 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """Virchow2 inference for PathoLink.
 
 Extract cell-level image embeddings from HEST h5ad.
+
+Author: Weitian Huang
+Email: cswthuang@scut.edu.cn
 """
 import argparse
 import os

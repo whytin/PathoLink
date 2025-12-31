@@ -1,6 +1,11 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """PathoLink results visualization.
 
 Spatial plots, UMAP, clustering, SSIM, PCC, etc.
+
+Author: Weitian Huang
+Email: cswthuang@scut.edu.cn
 """
 import argparse
 import os

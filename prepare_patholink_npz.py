@@ -1,3 +1,13 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Prepare training data for PathoLink.
+
+Combine h5ad + precomputed embeddings into .npz format.
+
+Author: Weitian Huang
+Email: cswthuang@scut.edu.cn
+"""
 import argparse
 import os
 from typing import Optional
