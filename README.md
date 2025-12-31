@@ -142,6 +142,10 @@ python visualize_results.py \
 
 ## 🧠 Model Architecture
 
+<div align="center">
+  <img src="model.jpg" alt="PathoLink Architecture" width="800"/>
+</div>
+
 PathoLink integrates three main components:
 
 1. **Virchow2** — Vision encoder for histopathological patches.  
@@ -150,7 +154,7 @@ PathoLink integrates three main components:
 
 The framework follows a synergistic information flow:
 ```
-H&E Image (X) → Latent Bridge (Z) → Omics Prediction (Y)
+(H&E Image (X) → synergy variable (Z) )→ Omics Prediction (Y)
 ```
 
 ---
