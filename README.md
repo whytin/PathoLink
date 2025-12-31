@@ -23,18 +23,22 @@ This design enables interpretable feature learning and robust cross-modal genera
 
 ```
 PathoLink/
-├── Virchow2/              # Vision backbone (e.g., patch-level encoder)
-├── build/                 # Compiled extensions and build scripts
-├── cuda/                  # CUDA kernels for GPU acceleration
-├── dataset/HEST/          # Data loading and preprocessing (H&E + spatial transcriptomics)
-├── doc/                   # Documentation and supplementary notes
-├── fastmoe.egg-info/      # FastMoE package metadata
-├── fmoe/                  # Mixture-of-Experts (FastMoE) implementation
-├── scGPT/                 # scGPT integration for single-cell/omics representation
-├── tests/                 # Unit tests and reproducibility scripts
-├── MoE.py                 # Mixture of Experts model wrapper
-├── transformer.py         # Transformer architecture definition
-└── requirements.txt       # Dependencies
+├── Virchow2/                    # Vision backbone (Virchow2 patch-level encoder)
+├── scGPT/                       # scGPT integration for single-cell/omics representation
+├── fmoe/                        # Mixture-of-Experts (FastMoE) implementation
+├── dataset/HEST/                # HEST data loading and preprocessing
+├── build/                       # Compiled extensions
+├── cuda/                        # CUDA kernels for GPU acceleration
+├── doc/                         # Documentation
+├── tests/                       # Unit tests
+├── MoE.py                       # Mixture of Experts layer
+├── transformer.py               # Transformer architecture
+├── train_patholink.py           # Multi-task training script (MMD + MSE + classification)
+├── infer_virchow2.py            # Virchow2 inference for cell patches
+├── infer_scgpt.py               # scGPT inference for gene embeddings
+├── prepare_patholink_npz.py     # Data preparation pipeline
+├── visualize_results.py         # Visualization tools (spatial, UMAP, PCC, SSIM)
+└── requirements.txt             # Dependencies
 ```
 
 ---
@@ -56,7 +60,85 @@ pip install -r requirements.txt
 ---
 
 
-## 🚀 Usage
+---
+
+## 🚀 Quick Start
+
+### Step 1: Prepare Data
+
+PathoLink requires precomputed embeddings from Virchow2 and scGPT. Starting from HEST data:
+
+```bash
+# 1. Extract Virchow2 image embeddings from cell patches
+python infer_virchow2.py \
+  --h5ad path/to/hest_data.h5ad \
+  --output embeddings/img_emb.npy \
+  --batch_size 256
+
+# 2. Extract scGPT gene-level embeddings and cell type labels
+python infer_scgpt.py \
+  --h5ad path/to/hest_data.h5ad \
+  --model_dir path/to/scGPT_pretrained \
+  --output_gene_emb embeddings/gene_emb.npy \
+  --output_cell_type embeddings/cell_type.npy \
+  --batch_size 64
+
+# 3. Prepare training data
+python prepare_patholink_npz.py \
+  --h5ad path/to/hest_data.h5ad \
+  --img_emb embeddings/img_emb.npy \
+  --gene_emb embeddings/gene_emb.npy \
+  --cell_type embeddings/cell_type.npy \
+  --output data/patholink_train.npz
+```
+
+### Step 2: Train PathoLink
+
+```bash
+python train_patholink.py \
+  --train_npz data/patholink_train.npz \
+  --batch_size 64 \
+  --epochs 50 \
+  --lr 1e-4 \
+  --lambda_mmd 1.0 \
+  --lambda_expr 1.0 \
+  --lambda_cls 1.0 \
+  --output_dir outputs/patholink_run1
+```
+
+**Key Parameters:**
+- `--lambda_mmd`: Weight for MMD alignment loss (image-gene embedding alignment)
+- `--lambda_expr`: Weight for MSE expression reconstruction loss
+- `--lambda_cls`: Weight for cell type classification loss
+- `--num_experts`: Number of MoE experts (default: 4)
+- `--mmd_max_samples`: Maximum samples for MMD computation (default: 8192)
+
+### Step 3: Visualize Results
+
+```bash
+# Evaluate predictions and generate visualizations
+python visualize_results.py \
+  --h5ad path/to/hest_data.h5ad \
+  --expr_true path/to/expr_true.npy \
+  --expr_pred path/to/expr_pred.npy \
+  --spatial_genes CD3D CD8A EPCAM \
+  --compute_ssim \
+  --compute_pcc \
+  --gene_corr_heatmap \
+  --scatter_plot \
+  --output_dir visualizations/
+```
+
+**Available Visualizations:**
+- Spatial gene expression maps
+- UMAP dimensionality reduction
+- Clustering results (Leiden)
+- SSIM (Structural Similarity Index)
+- PCC (Pearson Correlation Coefficient)
+- Gene correlation heatmaps
+- True vs predicted scatter plots
+
+---
 
 ## 🧠 Model Architecture
 
@@ -75,11 +157,15 @@ H&E Image (X) → Latent Bridge (Z) → Omics Prediction (Y)
 
 ## 🧪 Development Status
 
-- [x] Core model implementation 
+- [x] Core model implementation (MoE + Transformer)
 - [x] scGPT integration
-- [ ] Full training scripts
+- [x] Virchow2 integration
+- [x] Full training pipeline (multi-task: MMD + MSE + classification)
+- [x] Inference scripts (Virchow2 + scGPT)
+- [x] Data preparation pipeline
+- [x] Visualization tools (spatial, UMAP, PCC, SSIM)
 - [ ] Pretrained checkpoints
-- [ ] Documentation and visualization tools
+- [ ] Comprehensive documentation
 
 > 🔧 *The codebase is being actively updated. Please watch or star the repository to get the latest updates.*
 
